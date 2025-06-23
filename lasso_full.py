@@ -1,8 +1,6 @@
 import time
 import numpy as np
 
-import numpy as np
-
 def soft_thresholding(z, gamma):
     return np.sign(z) * np.maximum(np.abs(z) - gamma, 0.0)
 
@@ -14,21 +12,21 @@ def lasso_coordinate_descent(X, y, lambda_=0.1, max_iter=1000, tol=1e-4,lr=1.0):
 
     for iteration in range(max_iter):
         beta_old = beta.copy()
+        max_delta = 0
 
         for j in range(n_features):
             gk = -np.dot(X[:, j], r)/n_samples
             beta[j] = beta_old[j]-lr * gk
             beta[j] = soft_thresholding(beta[j], lambda_)
             delta = beta[j] - beta_old[j]
+            if np.abs(delta) > max_delta:             
+                max_delta = np.abs(delta)         
             r -= delta * X[:, j]
-
-        if np.linalg.norm(beta - beta_old,ord=2) < tol:
-            print(f"Converged in {iteration + 1} iterations.")
-            break
+        if max_delta < tol:          
+            print(f"Converged in {iteration + 1} iters.")
+            return beta
 
     return beta
-
-
 
 
 
